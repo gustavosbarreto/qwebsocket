@@ -12,10 +12,10 @@ public:
     Bridge(QWebSocket *parent): QObject(parent), webSocket(parent) { }
 
     QWebSocket *webSocket;
-    QString address;
+    QUrl url;
 
 public slots:
-    QString getAddress() { return address; }
+    QString getUrl() { return url.toString(); }
 
     void emitOpened()
     {
@@ -28,11 +28,11 @@ public slots:
     }
 };
 
-QWebSocket::QWebSocket(const QString &address, QObject *parent)
+QWebSocket::QWebSocket(const QUrl &url, QObject *parent)
     : QObject(parent)
 {
     bridge = new Bridge(this);
-    bridge->address = address;
+    bridge->url = url;
 
     webView = new QWebView();
     connect(webView->page()->currentFrame(), SIGNAL(javaScriptWindowObjectCleared()), SLOT(addBridge()));

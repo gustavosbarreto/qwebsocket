@@ -4,13 +4,14 @@
 #include <QObject>
 
 class QWebView;
+class QUrl;
 
 class QWebSocket: public QObject
 {
     Q_OBJECT
 
 public:
-    QWebSocket(const QString &address, QObject *parent);
+    QWebSocket(const QUrl &url, QObject *parent);
 
     void send(const QByteArray &data);
 

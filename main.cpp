@@ -1,4 +1,5 @@
 #include <QApplication>
+#include <QUrl>
 
 #include "qwebsocket.h"
 
@@ -23,7 +24,7 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
 
     Worker *w = new Worker;
-    webSocket = new QWebSocket("localhost", NULL);
+    webSocket = new QWebSocket(QUrl("ws://localhost:8081/"), NULL);
     QObject::connect(webSocket, SIGNAL(opened()), w, SLOT(sendMessage()));
 
     return app.exec();
