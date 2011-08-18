@@ -13,6 +13,7 @@ class QWebSocket: public QObject
 public:
     QWebSocket(const QUrl &url, QObject *parent);
 
+    // Send data to WebSocket server
     void send(const QByteArray &data);
 
 private slots:
@@ -26,8 +27,10 @@ private:
     QWebView *webView;
 
 signals:
+    // The socket has opened
     void opened();
-    void messageReceived(const QString &);
+    // The socket has been received data
+    void messageReceived(const QString &data);
 };
 
 #endif
