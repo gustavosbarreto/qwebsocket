@@ -26,6 +26,16 @@ public slots:
     {
         emit webSocket->messageReceived(message);
     }
+    
+    void emitClosed()
+    {
+        emit webSocket->closed();
+    }
+    
+    void emitError(const QString &message)
+    {
+        emit webSocket->error();
+    }
 };
 
 QWebSocket::QWebSocket(const QUrl &url, QObject *parent)
