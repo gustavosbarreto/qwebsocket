@@ -34,7 +34,7 @@ public slots:
     
     void emitError(const QString &message)
     {
-        emit webSocket->error();
+        emit webSocket->error(message);
     }
 };
 
