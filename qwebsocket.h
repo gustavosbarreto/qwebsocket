@@ -31,6 +31,10 @@ signals:
     void opened();
     // The socket has been received data
     void messageReceived(const QString &data);
+
+    void closed();
+
+    void error(const QString &data);
 };
 
 #endif
