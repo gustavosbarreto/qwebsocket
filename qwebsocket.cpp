@@ -44,6 +44,9 @@ QWebSocket::QWebSocket(const QUrl &url, QObject *parent)
     bridge = new Bridge(this);
     bridge->url = url;
 
+    QWebSettings::globalSettings()->setAttribute(QWebSettings::LocalContentCanAccessRemoteUrls, false);
+    QWebSettings::globalSettings()->setAttribute(QWebSettings::LocalContentCanAccessFileUrls, false);
+
     webView = new QWebView();
     connect(webView->page()->currentFrame(), SIGNAL(javaScriptWindowObjectCleared()), SLOT(addBridge()));
     webView->load(QUrl("qrc:/websocket.html"));
