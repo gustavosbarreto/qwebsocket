@@ -4,7 +4,7 @@
 
 QT += network webkit
 TEMPLATE = app
-TARGET = 
+TARGET = echotest
 DEPENDPATH += .
 INCLUDEPATH += .
 
@@ -12,4 +12,5 @@ RESOURCES += resources.qrc
 
 # Input
 HEADERS += qwebsocket.h
-SOURCES += main.cpp qwebsocket.cpp
+SOURCES += echotest.cpp qwebsocket.cpp
+FORMS += echotest.ui
