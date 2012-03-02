@@ -1,4 +1,5 @@
 #include "qwebsocket.h"
+#include "httpdaemon.h"
 
 #include <QWebView>
 #include <QWebPage>
@@ -41,15 +42,14 @@ public slots:
 QWebSocket::QWebSocket(const QUrl &url, QObject *parent)
     : QObject(parent)
 {
+    HttpDaemon *daemon = new HttpDaemon;
+
     bridge = new Bridge(this);
     bridge->url = url;
 
-    QWebSettings::globalSettings()->setAttribute(QWebSettings::LocalContentCanAccessRemoteUrls, false);
-    QWebSettings::globalSettings()->setAttribute(QWebSettings::LocalContentCanAccessFileUrls, false);
-
     webView = new QWebView();
     connect(webView->page()->currentFrame(), SIGNAL(javaScriptWindowObjectCleared()), SLOT(addBridge()));
-    webView->load(QUrl("qrc:/websocket.html"));
+    webView->load(QUrl(QString("http://127.0.0.1:%1/websocket.html").arg(daemon->serverPort())));
 }
 
 void QWebSocket::send(const QByteArray &data)

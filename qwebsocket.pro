@@ -11,6 +11,6 @@ INCLUDEPATH += .
 RESOURCES += resources.qrc
 
 # Input
-HEADERS += qwebsocket.h
-SOURCES += echotest.cpp qwebsocket.cpp
+HEADERS += qwebsocket.h httpdaemon.h
+SOURCES += echotest.cpp qwebsocket.cpp httpdaemon.cpp
 FORMS += echotest.ui
