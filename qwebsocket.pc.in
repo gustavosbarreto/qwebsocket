@@ -1,0 +1,11 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=@CMAKE_INSTALL_PREFIX@
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: qwebsocket
+Description: Qt WebSocket library
+Version: @QWEBSOCKET_VERSION_FULL@
+Libs: -L${libdir} -lqwebsocket
+Cflags: -I${includedir}
+
