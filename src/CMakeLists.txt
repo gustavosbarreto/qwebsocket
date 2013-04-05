@@ -10,7 +10,7 @@ include(FindPkgConfig)
 
 find_package(Qt4 REQUIRED)
 find_package(X11 REQUIRED)
-find_package(Boost 1.48 COMPONENTS system thread random regex REQUIRED)
+find_package(Boost 1.48 COMPONENTS date_time program_options system thread random regex REQUIRED)
 
 set(WEBSOCKETPP_SRCDIR ${PROJECT_SOURCE_DIR}/3rdparty/websocketpp/src)
 
@@ -52,7 +52,9 @@ add_library(qwebsocket SHARED
 
 set_target_properties(qwebsocket PROPERTIES VERSION ${QWEBSOCKET_VERSION_FULL} SOVERSION ${QWEBSOCKET_VERSION})
 
-target_link_libraries(qwebsocket ${Boost_LIBRARIES})
+target_link_libraries(qwebsocket
+    ${Boost_LIBRARIES}
+    ${QT_LIBRARIES} ${QT_QTNETWORK_LIBRARIES})
 
 file(GLOB HEADERS "*.h")
 install_files(/include FILES ${HEADERS})
