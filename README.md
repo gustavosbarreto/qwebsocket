@@ -3,6 +3,8 @@ QWebSocket
 
 Qt WebSocket library
 
+[![Build Status](https://travis-ci.org/gustavosbarreto/qwebsocket.png?branch=master)](https://travis-ci.org/gustavosbarreto/qwebsocket)
+
 Building
 --------
 
