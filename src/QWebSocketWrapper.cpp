@@ -1,22 +1,37 @@
 #include "QWebSocketWrapper.h"
 
-#include <websocketpp.hpp>
-#include <websocket_connection_handler.hpp>
+#include <websocketpp/common/thread.hpp>
+#include <websocketpp/config/asio_no_tls_client.hpp>
+#include <websocketpp/client.hpp>
 
-#include <boost/bind.hpp>
-#include <boost/asio.hpp>
+#include <QDebug>
 
-#include <QtCore/QDebug>
+typedef websocketpp::client<websocketpp::config::asio_client> asio_client;
+typedef websocketpp::config::asio_client::message_type::ptr message_ptr;
 
-using websocketpp::session_ptr;
+using websocketpp::lib::placeholders::_1;
+using websocketpp::lib::placeholders::_2;
 
-class QWebSocketWrapperPrivate: public websocketpp::connection_handler
+using websocketpp::lib::bind;
+
+class QWebSocketWrapperPrivate
 {
 public:
     QWebSocketWrapperPrivate(const QUrl &uri, QWebSocketWrapper *wrapper)
         : _wrapper(wrapper)
         , _uri(uri)
     {
+        _endpoint.set_access_channels(websocketpp::log::alevel::all);
+        _endpoint.set_error_channels(websocketpp::log::elevel::all);
+
+        // Initialize ASIO
+        _endpoint.init_asio();
+
+        // Register our handlers
+        _endpoint.set_open_handler(bind(&QWebSocketWrapperPrivate::on_open,this,::_1));
+        _endpoint.set_message_handler(bind(&QWebSocketWrapperPrivate::on_message,this,::_1,::_2));
+        _endpoint.set_close_handler(bind(&QWebSocketWrapperPrivate::on_close,this,::_1));
+        _endpoint.set_fail_handler(bind(&QWebSocketWrapperPrivate::on_fail,this,::_1));
     }
 
     virtual ~QWebSocketWrapperPrivate()
@@ -24,65 +39,69 @@ public:
     }
 
 public:
-    void on_fail(session_ptr con)
+    void on_fail(websocketpp::connection_hdl hdl)
     {
         qDebug() << "Connection Failed: " << _uri;
 
+        _hdl = hdl;
         _wrapper->failed();
     }
 
-    void on_open(session_ptr con)
+    void on_open(websocketpp::connection_hdl hdl)
     {
         qDebug() << "Connection Opened: " << _uri;
 
-        _session = con;
+        _hdl = hdl;
         _wrapper->opened();
     }
 
-    void on_close(session_ptr con)
+    void on_close(websocketpp::connection_hdl hdl)
     {
         qDebug() << "Connection Closed: " << _uri;
 
-        _session = websocketpp::client_session_ptr();
+        _hdl = hdl;
         _wrapper->closed();
     }
 
-    void on_message(session_ptr con, const std::string &msg)
+    void on_message(websocketpp::connection_hdl, message_ptr msg)
     {
-        const QString message = QString::fromUtf8(msg.c_str());
+        const QString message = QString::fromUtf8(msg->get_payload().c_str());
         qDebug() << "Got Message:" << message;
 
         _wrapper->message(message);
     }
 
-    virtual void on_message(session_ptr session, const std::vector<unsigned char> &data)
-    {
-        qWarning() << "The method or operation is not implemented.";
-    }
-
     void send(const QString &msg)
     {
-        if (!_session) {
-            qDebug() << "Tried to send on a disconnected connection! Aborting.";
-            return;
-        }
+        websocketpp::lib::error_code error;
+        _endpoint.send(_hdl, msg.toUtf8().data(), websocketpp::frame::opcode::text, error);
 
-        _session->send(msg.toUtf8().data());
+        if (error == boost::asio::error::not_connected)
+            qDebug() << "Tried to send on a disconnected connection! Aborting.";
     }
 
     void close()
     {
-        if (!_session) {
-            qDebug() << "Tried to close a disconnected connection!";
-            return;
-        }
+        websocketpp::lib::error_code error;
+        _endpoint.close(_hdl,websocketpp::close::status::going_away,"",error);
 
-        _session->close(websocketpp::close::status::GOING_AWAY,"");
+        if (error == boost::asio::error::not_connected)
+            qDebug() << "Tried to close a disconnected connection!";
+    }
+
+    void start()
+    {
+        websocketpp::lib::error_code error;
+        asio_client::connection_ptr conn = _endpoint.get_connection(_uri.toString().toStdString(), error);
+
+        _endpoint.connect(conn);
+        _endpoint.run();
     }
 
     QWebSocketWrapper *_wrapper;
     QUrl _uri;
-    session_ptr _session;
+    asio_client _endpoint;
+    websocketpp::connection_hdl _hdl;
 };
 
 QWebSocketWrapper::QWebSocketWrapper(const QUrl &uri, QObject *parent)
@@ -102,18 +121,8 @@ QWebSocketWrapper::~QWebSocketWrapper()
 void QWebSocketWrapper::run()
 {
     try {
-        boost::asio::io_service io_service;
-
-        websocketpp::client_ptr client(
-            new websocketpp::client(io_service, boost::shared_ptr<QWebSocketWrapperPrivate>(_handler.data())));
-
-        client->init();
-        client->set_header("User Agent","Qt QWebSocket++");
-
-        client->connect(_handler->_uri.toString().toStdString());
-
-        io_service.run();
-    } catch(std::exception& e) {
+        _handler->start();
+      } catch(std::exception& e) {
         emit failed();
         qWarning() << "Caught exception trying to get connection to endpoint: " << _handler->_uri << e.what();
     } catch (const char* msg) {

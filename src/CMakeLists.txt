@@ -12,7 +12,7 @@ find_package(Qt4 REQUIRED)
 find_package(X11 REQUIRED)
 find_package(Boost 1.48 COMPONENTS date_time program_options system thread random regex REQUIRED)
 
-set(WEBSOCKETPP_SRCDIR ${PROJECT_SOURCE_DIR}/3rdparty/websocketpp/src)
+set(WEBSOCKETPP_DIR ${PROJECT_SOURCE_DIR}/3rdparty/websocketpp)
 
 include(${QT_USE_FILE})
 include_directories(${QT_QTCORE_INCLUDE_DIR}
@@ -20,7 +20,7 @@ include_directories(${QT_QTCORE_INCLUDE_DIR}
   ${QT_QTXML_INCLUDE_DIR}
   ${QT_QTDBUS_INCLUDE_DIR}
   ${QT_QTNETWORK_INCLUDE_DIR}
-  ${WEBSOCKETPP_SRCDIR}
+  ${WEBSOCKETPP_DIR}
   .)
 
 set(WEBSOCKETPP_SOURCES
@@ -45,8 +45,6 @@ qt4_wrap_cpp(MOC_SOURCES
 
 add_library(qwebsocket SHARED
   ${WEBSOCKETPP_SOURCES}
-  ${WEBSOCKETPP_SRCDIR}/base64/base64.cpp
-  ${WEBSOCKETPP_SRCDIR}/sha1/sha1.cpp
   ${SOURCES}
   ${MOC_SOURCES})
 
