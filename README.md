@@ -8,6 +8,8 @@ Qt WebSocket library
 Building
 --------
 
+**If you need Qt4 version, checkout the qt4 branch**
+
     $ git clone --recursive https://github.com/gustavosbarreto/qwebsocket.git
     $ cd qwebsocket
     $ cmake -DCMAKE_INSTALL_PREFIX=/usr

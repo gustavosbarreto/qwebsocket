@@ -5,16 +5,16 @@ set(QWEBSOCKET_VERSION_MINOR "0")
 set(QWEBSOCKET_VERSION_PATCH "0")
 set(QWEBSOCKET_VERSION "${QWEBSOCKET_VERSION_MAJOR}.${QWEBSOCKET_VERSION_MINOR}")
 set(QWEBSOCKET_VERSION_FULL "${QWEBSOCKET_VERSION}.${QWEBSOCKET_VERSION_PATCH}")
+set(CMAKE_AUTOMOC ON)
 
 include(FindPkgConfig)
 
-find_package(Qt4 REQUIRED)
+find_package(Qt5Core REQUIRED)
 find_package(X11 REQUIRED)
 find_package(Boost 1.48 COMPONENTS date_time program_options system thread random regex REQUIRED)
 
 set(WEBSOCKETPP_DIR ${PROJECT_SOURCE_DIR}/3rdparty/websocketpp)
 
-include(${QT_USE_FILE})
 include_directories(${QT_QTCORE_INCLUDE_DIR}
   ${QT_QTGUI_INCLUDE_DIR}
   ${QT_QTXML_INCLUDE_DIR}
@@ -39,10 +39,6 @@ set(SOURCES
 
 file(GLOB WEBSOCKETPP_SOURCES ${WEBSOCKETPP_SRCDIR}/*.cpp)
 
-qt4_wrap_cpp(MOC_SOURCES
-  QWebSocket.h
-  QWebSocketWrapper.h)
-
 add_library(qwebsocket SHARED
   ${WEBSOCKETPP_SOURCES}
   ${SOURCES}
@@ -53,6 +49,8 @@ set_target_properties(qwebsocket PROPERTIES VERSION ${QWEBSOCKET_VERSION_FULL} S
 target_link_libraries(qwebsocket
     ${Boost_LIBRARIES}
     ${QT_LIBRARIES} ${QT_QTNETWORK_LIBRARIES})
+
+qt5_use_modules(qwebsocket Core)
 
 file(GLOB HEADERS "*.h")
 install_files(/include FILES ${HEADERS})

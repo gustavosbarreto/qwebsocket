@@ -1,3 +1,5 @@
+QT = gui widgets
+
 TEMPLATE = app
 
 CONFIG += link_pkgconfig
